@@ -39,14 +39,17 @@ class PostResponse(BaseModel):
     quality_metrics: dict = {}
 
 @app.get("/")
+@app.get("/api/")
 async def root():
     return {"message": "AI Social Media Post Generator API v2.0 - Now with Supervisor Pattern!"}
 
 @app.get("/health")
+@app.get("/api/health")
 async def health_check():
     return {"status": "healthy", "version": "2.0.0", "features": ["supervisor_pattern", "enhanced_monitoring"]}
 
 @app.get("/workflow-info")
+@app.get("/api/workflow-info")
 async def workflow_info(use_supervisor: bool = Query(True, description="Whether to use supervisor pattern")):
     """Get information about the available workflow patterns."""
     if use_supervisor:
@@ -75,6 +78,7 @@ async def workflow_info(use_supervisor: bool = Query(True, description="Whether 
         }
 
 @app.post("/generate-post", response_model=PostResponse)
+@app.post("/api/generate-post", response_model=PostResponse)
 async def generate_post(request: PostRequest):
     """Generate a social media post using supervisor or linear pattern."""
     try:
@@ -106,6 +110,7 @@ async def generate_post(request: PostRequest):
         raise HTTPException(status_code=500, detail=f"Error generating post: {str(e)}")
 
 @app.post("/generate-post-legacy", response_model=PostResponse)
+@app.post("/api/generate-post-legacy", response_model=PostResponse)
 async def generate_post_legacy(request: PostRequest):
     """Generate a post using the original linear workflow (for comparison)."""
     try:
