@@ -1,6 +1,14 @@
-# AI Social Media Post Generator
+# AI Social Media Post Generator v2.0
 
-Transform academic papers into engaging LinkedIn posts using advanced AI workflows powered by LangGraph and OpenAI.
+Transform academic papers into engaging LinkedIn posts using advanced AI workflows powered by LangGraph and OpenAI, now with **Supervisor Pattern** for enhanced orchestration!
+
+## ✨ What's New in v2.0
+
+- 🧠 **Supervisor Pattern**: AI supervisor coordinates specialized agents for optimal workflow
+- 🎯 **Intelligent Routing**: Dynamic decision-making based on content quality and context
+- 📊 **Enhanced Monitoring**: Detailed insights, quality metrics, and workflow analytics
+- 🔄 **Adaptive Workflow**: Self-optimizing process that adapts to content complexity
+- 🛡️ **Better Error Handling**: Robust recovery mechanisms and fallback strategies
 
 ## Features
 
@@ -10,13 +18,40 @@ Transform academic papers into engaging LinkedIn posts using advanced AI workflo
 - ✅ **Quality Verification**: Built-in technical and style checking
 - 🔄 **Auto-Revision**: Automatically improves posts until quality standards are met
 - 🎨 **Modern UI**: Beautiful, responsive React frontend with Tailwind CSS
+- 🧠 **Supervisor Pattern**: Intelligent workflow orchestration (NEW!)
 
 ## Architecture
 
-- **Backend**: FastAPI with LangGraph workflows
+- **Backend**: FastAPI with LangGraph workflows + Supervisor Pattern
 - **Frontend**: Next.js 14 with TypeScript and Tailwind CSS
-- **AI**: OpenAI GPT-4 with LangChain agents
+- **AI**: OpenAI GPT-4 with LangChain agents + AI Supervisor
+- **Orchestration**: Intelligent workflow routing and quality optimization
 - **Deployment**: Vercel (full-stack)
+
+### Workflow Patterns
+
+#### 🧠 Supervisor Pattern (Recommended)
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ Supervisor  │───▶│  Research   │───▶│ Summarize   │
+│   Agent     │    │   Agent     │    │   Agent     │
+└─────────────┘    └─────────────┘    └─────────────┘
+       │                                      │
+       ▼                                      ▼
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│  Quality    │◀───│   Verify    │◀───│    Post     │
+│ Monitoring  │    │   Agent     │    │   Agent     │
+└─────────────┘    └─────────────┘    └─────────────┘
+```
+
+**Benefits**: Intelligent routing • Enhanced error handling • Quality optimization • Workflow insights
+
+#### ⚡ Linear Pattern (Legacy)
+```
+Research → Summarize → Post → Verify → Complete
+```
+
+**Benefits**: Simple flow • Predictable execution • Lower overhead
 
 ## Quick Start
 
@@ -58,6 +93,18 @@ chmod +x setup_local.sh
 ./setup_local.sh
 ```
 
+### Testing the Supervisor Pattern
+
+Test the new supervisor pattern vs. linear workflow:
+```bash
+python test_supervisor_pattern.py
+```
+
+This will demonstrate:
+- Performance comparison between patterns
+- Quality metrics and insights
+- Supervisor decision-making capabilities
+
 ## Deployment on Vercel
 
 ### One-Click Deploy
@@ -90,16 +137,18 @@ The app is configured for Vercel with:
 
 ### POST `/api/generate-post`
 
-Generate a social media post from a paper title.
+Generate a social media post using supervisor or linear pattern.
 
 **Request:**
 ```json
 {
-  "paper_title": "LoRA: Low-Rank Adaptation of Large Language Models"
+  "paper_title": "LoRA: Low-Rank Adaptation of Large Language Models",
+  "openai_api_key": "your-api-key",
+  "use_supervisor": true
 }
 ```
 
-**Response:**
+**Response (Supervisor Pattern):**
 ```json
 {
   "summary": "Generated summary...",
@@ -107,9 +156,49 @@ Generate a social media post from a paper title.
   "verify_result": "pass",
   "revision_count": 1,
   "tech_check": "pass",
-  "style_check": "pass"
+  "style_check": "pass",
+  "supervisor_insights": {
+    "completed_steps": ["research", "summarize", "post", "verify"],
+    "workflow_efficiency": 1.0,
+    "completion_reason": "quality_achieved"
+  },
+  "workflow_pattern": "supervised",
+  "quality_metrics": {
+    "overall_quality": 0.9,
+    "mention_compliance": true,
+    "character_efficiency": 0.8
+  }
 }
 ```
+
+### GET `/api/workflow-info`
+
+Get information about available workflow patterns.
+
+**Parameters:**
+- `use_supervisor` (boolean): Pattern to get info about
+
+**Response:**
+```json
+{
+  "pattern": "supervisor",
+  "description": "AI supervisor coordinates specialized agents for optimal workflow",
+  "benefits": ["Intelligent routing", "Enhanced error handling", "Quality optimization"],
+  "status": {
+    "supervisor_enabled": true,
+    "agent_count": 4,
+    "capabilities": {
+      "intelligent_routing": true,
+      "error_recovery": true,
+      "adaptive_workflow": true
+    }
+  }
+}
+```
+
+### POST `/api/generate-post-legacy`
+
+Generate a post using the original linear workflow (for comparison).
 
 ## Development
 

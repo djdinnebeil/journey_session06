@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Literal
+from typing import TypedDict, List, Literal, Dict, Any, Optional
 
 class PostState(TypedDict):
     messages: List
@@ -7,4 +7,6 @@ class PostState(TypedDict):
     verify_result: Literal["pass", "revise"]
     revision_count: int
     tech_check: str
-    style_check: str 
+    style_check: str
+    # Supervisor pattern enhancements
+    supervisor_status: Optional[Dict[str, Any]] 

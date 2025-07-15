@@ -3,6 +3,7 @@ from langchain.agents import create_openai_functions_agent, AgentExecutor
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnableLambda
 from typing import List, Dict, Any
+import os
 from api.services.tools import mock_paper_lookup, verify_technical_correctness, check_social_post_style
 
 class AgentFactory:
@@ -11,30 +12,39 @@ class AgentFactory:
     
     def _ensure_llm(self):
         """Ensure LLM is initialized with current API key"""
-        if self.llm is None:
-            self.llm = ChatOpenAI(model="gpt-4o")
+        # Always recreate LLM to get the current API key from environment
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OpenAI API key must be set in environment variable OPENAI_API_KEY")
+        self.llm = ChatOpenAI(model="gpt-4o", api_key=api_key)
     
     def create_tool_agent(self, system_prompt: str, tools: List):
         """Create an agent that can use tools."""
-        self._ensure_llm()
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", system_prompt),
-            MessagesPlaceholder("messages"),
-            MessagesPlaceholder("agent_scratchpad"),
-        ])
-        agent = create_openai_functions_agent(llm=self.llm, tools=tools, prompt=prompt)
-        return AgentExecutor(agent=agent, tools=tools)
+        def agent_runner(state):
+            # Initialize LLM with current API key when actually running
+            self._ensure_llm()
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", system_prompt),
+                MessagesPlaceholder("messages"),
+                MessagesPlaceholder("agent_scratchpad"),
+            ])
+            agent = create_openai_functions_agent(llm=self.llm, tools=tools, prompt=prompt)
+            executor = AgentExecutor(agent=agent, tools=tools)
+            return executor.invoke(state)
+        
+        return RunnableLambda(agent_runner)
 
     def create_prompt_only_agent(self, system_prompt: str, output_key: str):
         """Create an agent that only uses prompts (no tools)."""
-        self._ensure_llm()
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", system_prompt),
-            MessagesPlaceholder(variable_name="messages"),
-        ])
-        chain = prompt | self.llm
-
-        def run(state: Dict[str, Any]):
+        def agent_runner(state: Dict[str, Any]):
+            # Initialize LLM with current API key when actually running
+            self._ensure_llm()
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", system_prompt),
+                MessagesPlaceholder(variable_name="messages"),
+            ])
+            chain = prompt | self.llm
+            
             messages = state.get("messages", [])
             if not isinstance(messages, list):
                 raise ValueError("Expected 'messages' to be a list")
@@ -43,8 +53,8 @@ class AgentFactory:
                 **state,
                 output_key: response.content
             }
-
-        return RunnableLambda(run)
+        
+        return RunnableLambda(agent_runner)
     
     def get_research_agent(self):
         """Get the research agent."""
